@@ -7,7 +7,7 @@
 A local proxy + web UI that shows exactly what Claude Code (and other agents) put on the wire:<br>
 the system prompt, every tool schema, the whole re-sent history, hidden Unicode, and your personal data.
 
-<a href="https://github.com/OWNER/wiretap/stargazers"><img src="https://img.shields.io/github/stars/OWNER/wiretap?style=flat&color=b4532a&labelColor=2b2620" alt="Stars"></a>
+<a href="https://github.com/pranav-singhal/wiretap/stargazers"><img src="https://img.shields.io/github/stars/pranav-singhal/wiretap?style=flat&color=b4532a&labelColor=2b2620" alt="Stars"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-6f8f5a?style=flat&labelColor=2b2620" alt="MIT"></a>
 <img src="https://img.shields.io/badge/dependencies-0-c99a3b?style=flat&labelColor=2b2620" alt="Zero dependencies">
 <img src="https://img.shields.io/badge/python-3.9%2B-a3967f?style=flat&labelColor=2b2620" alt="Python 3.9+">
@@ -34,7 +34,7 @@ the system prompt, every tool schema, the whole re-sent history, hidden Unicode,
 ## Quick start
 
 ```bash
-git clone https://github.com/OWNER/wiretap && cd wiretap && python3 -m wiretap --open
+git clone https://github.com/pranav-singhal/wiretap && cd wiretap && python3 -m wiretap --open
 ```
 
 ```bash
@@ -146,7 +146,7 @@ Good first issues:
 
 ## Star history
 
-<a href="https://star-history.com/#OWNER/wiretap&Date"><img src="https://api.star-history.com/svg?repos=OWNER/wiretap&type=Date" alt="Star history" width="600"></a>
+<a href="https://star-history.com/#pranav-singhal/wiretap&Date"><img src="https://api.star-history.com/svg?repos=pranav-singhal/wiretap&type=Date" alt="Star history" width="600"></a>
 
 If wiretap showed you something surprising, a star helps others find it.
 

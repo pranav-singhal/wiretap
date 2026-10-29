@@ -28,7 +28,7 @@ classifiers = [
 wiretap = "wiretap.core:main"
 
 [project.urls]
-Homepage = "https://github.com/OWNER/wiretap"
+Homepage = "https://github.com/pranav-singhal/wiretap"
 
 [tool.setuptools]
 packages = ["wiretap"]

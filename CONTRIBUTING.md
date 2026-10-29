@@ -5,7 +5,7 @@ Thanks for helping. The ground rules are the same as the product's: **show only 
 ## Dev setup
 
 ```bash
-git clone https://github.com/OWNER/wiretap && cd wiretap
+git clone https://github.com/pranav-singhal/wiretap && cd wiretap
 python3 -m unittest -v          # or: pytest
 python3 scripts/demo.py         # UI with synthetic traffic on http://127.0.0.1:8788
 python3 -m wiretap --upstream http://127.0.0.1:9999   # with: python3 tests/mock_upstream.py 9999

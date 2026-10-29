@@ -8,7 +8,7 @@ Researched 29 Oct 2026. Counts and rules were read on that day and change often:
 
 ## 0. Pre-launch checklist (do all of this before day 1)
 
-- [ ] Create the GitHub repo, replace `OWNER` (see "Renaming OWNER" at the bottom), push, then **pin it** on your profile.
+- [ ] Push the repo, then **pin it** on your profile.
 - [ ] Add a description (the tagline) and these topics: `claude-code codex ai-agents llm proxy debugging observability prompt-injection security mcp developer-tools`.
 - [ ] **Record the hero GIF from a real session** on your Mac: `wiretap --open`, a fresh `claude` through it, type `Reply OK`, show the overview, then the Tools and Hidden chars tabs. 10–15 s, 1200 px wide (`ffmpeg -i in.mov -vf "fps=12,scale=1200:-1" docs/hero.gif`).
   - **Before recording, open the Personal data tab and check what's on screen.** Your real session contains your email, username, home path and memory file contents. Record in a throwaway directory, use a throwaway user or a demo `~/.claude` setup, or crop. Then replace the `<picture>` hero in the README with the GIF.
@@ -52,7 +52,7 @@ Visual: the hero GIF. Typing "Reply OK" (8 bytes), then the overview showing how
 >
 > One command, zero dependencies, runs locally. Free + MIT.
 >
-> github.com/OWNER/wiretap
+> github.com/pranav-singhal/wiretap
 
 **Reply 1:** how it works
 > Point your agent at it with one env var:
@@ -157,7 +157,7 @@ Suggested one-line description: `wiretap - Local proxy and web UI that shows the
 
 ## 8. Short video / reels
 
-Earlier research suggested itr-wala got stars from reels **(unverified)**. A 20-second vertical video: (1) type "Reply OK" (2) cut to wiretap: "8 bytes typed, [N] KB sent" (3) scroll the tool list (4) Hidden chars tab decoding a planted instruction (5) "github.com/OWNER/wiretap". Post on Instagram Reels, YouTube Shorts and X. The hook line: "Your AI agent sends [N]× more than you type."
+Earlier research suggested itr-wala got stars from reels **(unverified)**. A 20-second vertical video: (1) type "Reply OK" (2) cut to wiretap: "8 bytes typed, [N] KB sent" (3) scroll the tool list (4) Hidden chars tab decoding a planted instruction (5) "github.com/pranav-singhal/wiretap". Post on Instagram Reels, YouTube Shorts and X. The hook line: "Your AI agent sends [N]× more than you type."
 
 ## 9. What could go wrong
 
@@ -169,11 +169,3 @@ Earlier research suggested itr-wala got stars from reels **(unverified)**. A 20-
 - **Security reports.** A proxy holding your key will attract scrutiny. `SECURITY.md` asks for private reports; respond within 48 h, fix fast, credit reporters.
 - **False positives in hidden-char detection.** If someone's Hindi or emoji text gets flagged, fix it the same day and add a test. That's a good-first-issue magnet.
 - **Untested agents.** The Codex and Gemini rows say "untested". Keep it that way until someone verifies.
-
-## Renaming OWNER
-
-Every `OWNER` placeholder is your GitHub username. They live in `README.md`, `CONTRIBUTING.md`, `pyproject.toml` and this file. One command after you create the repo:
-
-```bash
-grep -rl OWNER README.md CONTRIBUTING.md pyproject.toml docs/launch-plan.md | xargs sed -i '' 's/OWNER/your-github-username/g'   # macOS sed
-```
