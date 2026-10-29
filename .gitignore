@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+# captures may contain your prompts and personal data: never commit them
+captures/
+*.jsonl
+.DS_Store

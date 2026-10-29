@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# PyPI "wiretap" is taken by an unrelated project, so the distribution is agent-wiretap;
+# the command you run is still `wiretap`.
+name = "agent-wiretap"
+dynamic = ["version"]
+description = "See every byte your coding agent sends. A local proxy + web UI for Claude Code, Codex and other agent API traffic."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = []
+keywords = ["claude-code", "codex", "llm", "proxy", "privacy", "observability", "ai-agents", "prompt", "tokens"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: Internet :: Proxy Servers",
+  "Topic :: Software Development :: Debuggers",
+]
+
+[project.scripts]
+wiretap = "wiretap.core:main"
+
+[project.urls]
+Homepage = "https://github.com/OWNER/wiretap"
+
+[tool.setuptools]
+packages = ["wiretap"]
+
+[tool.setuptools.package-data]
+wiretap = ["ui.html"]
+
+[tool.setuptools.dynamic]
+version = { attr = "wiretap.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

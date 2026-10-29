@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>wiretap</title>
+<style>
+:root{--bg:#0b0d12;--panel:#12151d;--panel2:#171b25;--line:#232838;--fg:#e6e8ef;--dim:#8a91a5;--accent:#b18cff;--accent2:#5ad1ff;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--sys:#b18cff;--tools:#5ad1ff;--msgs:#4ade80;--other:#64748b;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+a{color:var(--accent2)}button{font:inherit;color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:5px 10px;cursor:pointer}button:hover{border-color:var(--accent)}
+code,pre,.mono{font-family:var(--mono);font-size:12.5px}
+header{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#141826,#0b0d12)}
+.logo{font-weight:800;font-size:18px;letter-spacing:-.3px}.logo span{color:var(--accent)}
+.tag{color:var(--dim);font-size:13px}.grow{flex:1}
+.pill{border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--dim);font-size:12px;white-space:nowrap}
+.envline{display:flex;align-items:center;gap:8px;background:#0e1118;border:1px solid var(--line);border-radius:8px;padding:4px 6px 4px 10px}
+.envline code{color:var(--ok)}
+main{display:grid;grid-template-columns:340px 1fr;height:calc(100% - 55px)}
+aside{border-right:1px solid var(--line);overflow:auto;background:var(--panel)}
+.listhead{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.item{padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer}.item:hover{background:var(--panel2)}.item.sel{background:#1d2030;box-shadow:inset 3px 0 0 var(--accent)}
+.item .l1{display:flex;gap:8px;align-items:center}.item .path{font-family:var(--mono);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.item .l2{display:flex;gap:10px;color:var(--dim);font-size:12px;margin-top:3px;flex-wrap:wrap}
+.st{font-family:var(--mono);font-size:11px;padding:1px 6px;border-radius:5px;background:#1f2937}.st.ok{color:var(--ok)}.st.bad{color:var(--bad)}.st.run{color:var(--warn)}
+.flag{font-size:11px;padding:0 6px;border-radius:5px}.flag.w{background:#3a2a07;color:var(--warn)}.flag.p{background:#3a0f16;color:#fda4af}
+.endpoints{padding:10px 12px;color:var(--dim);font-size:12px}.endpoints h4{margin:6px 0;color:var(--fg);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+section#detail{overflow:auto;padding:18px 22px}
+.empty{max-width:640px;margin:8vh auto;text-align:center;color:var(--dim)}.empty h1{color:var(--fg);font-size:28px;margin:0 0 6px}
+.empty pre{background:var(--panel);border:1px solid var(--line);padding:14px;border-radius:10px;text-align:left;color:var(--ok);white-space:pre-wrap}
+.dhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}.dhead h2{margin:0;font-size:17px;font-family:var(--mono)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:10px 0 16px;flex-wrap:wrap}
+.tab{padding:7px 12px;border:none;background:none;border-bottom:2px solid transparent;border-radius:0;color:var(--dim)}.tab.on{color:var(--fg);border-bottom-color:var(--accent)}
+.tab .n{font-size:11px;margin-left:5px;padding:0 6px;border-radius:9px;background:#262b3b}.tab .n.w{background:#3a2a07;color:var(--warn)}.tab .n.p{background:#3a0f16;color:#fda4af}
+.hero{background:radial-gradient(1200px 200px at 0 0,#2a1d4a,transparent),var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:16px}
+.hero .big{font-size:30px;font-weight:800;letter-spacing:-.5px}.hero .big em{font-style:normal;color:var(--accent)}
+.hero .sub{color:var(--dim);margin-top:4px}.hero q{color:var(--fg);font-family:var(--mono);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}.card .k{color:var(--dim);font-size:12px}.card .v{font-size:20px;font-weight:700;margin-top:2px}.card .s{color:var(--dim);font-size:12px}
+.stack{display:flex;height:16px;border-radius:8px;overflow:hidden;background:#1f2433;margin:8px 0 6px}.stack div{height:100%}
+.legend{display:flex;gap:14px;color:var(--dim);font-size:12px;flex-wrap:wrap}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--dim);margin:20px 0 8px}
+.bars .row{display:grid;grid-template-columns:220px 1fr 110px;gap:10px;align-items:center;padding:3px 0;font-size:13px}
+.bars .lab{font-family:var(--mono);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bars .bar{height:10px;border-radius:5px;background:#1f2433;overflow:hidden}.bars .bar div{height:100%}
+.bars .num{text-align:right;color:var(--dim);font-family:var(--mono);font-size:12px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+summary{cursor:pointer;padding:9px 12px;display:flex;gap:10px;align-items:center;list-style:none}summary::-webkit-details-marker{display:none}
+summary .meta{color:var(--dim);font-size:12px;margin-left:auto;font-family:var(--mono)}
+details pre{margin:0;padding:12px;border-top:1px solid var(--line);white-space:pre-wrap;word-break:break-word;max-height:70vh;overflow:auto}
+.role{font-size:11px;padding:1px 7px;border-radius:5px;font-family:var(--mono)}.role.user{background:#123524;color:var(--ok)}.role.assistant{background:#1d2442;color:var(--accent2)}.role.system,.role.developer{background:#2a1d4a;color:var(--accent)}
+.hc{background:var(--bad);color:#000;border-radius:3px;padding:0 3px;font-size:11px;font-weight:700}
+.hc.info{background:#64748b}
+mark{background:#7f1d1d;color:#fecaca;border-radius:3px;padding:0 2px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--dim);font-weight:500;font-size:12px}
+td.mono{word-break:break-all}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.chip{border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px}
+.dl{font-family:var(--mono);font-size:12px;white-space:pre-wrap}.dl .a{color:var(--ok)}.dl .d{color:var(--bad)}.dl .h{color:var(--accent2)}
+.note{color:var(--dim);font-size:12px;margin:6px 0 12px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--panel2);border:1px solid var(--accent);padding:8px 14px;border-radius:8px;display:none}
+@media (max-width:900px){main{grid-template-columns:1fr}aside{max-height:35vh}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" id="logo">wire<span>tap</span></div>
+  <div class="tag" id="tagline">See every byte your coding agent sends.</div>
+  <div class="grow"></div>
+  <div class="envline"><code id="envline">ANTHROPIC_BASE_URL=… claude</code><button id="copyenv" title="copy">copy</button></div>
+  <span class="pill" id="upstream">upstream</span>
+</header>
+<main>
+  <aside>
+    <div class="listhead"><b>Requests</b><span class="pill" id="count">0</span><div class="grow"></div>
+      <label class="tag"><input type="checkbox" id="follow" checked> follow</label><button id="clear">clear</button></div>
+    <div id="list"></div>
+    <div class="endpoints" id="endpoints"></div>
+  </aside>
+  <section id="detail"></section>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const BASE=location.pathname.replace(/\/(index\.html)?$/,'');
+const api=p=>fetch(BASE+p,{cache:'no-store'}).then(r=>r.json());
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>n==null?'–':Number(n).toLocaleString();
+const kb=n=>n==null?'–':n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(2)+' MB';
+let state={rev:-1,items:[],sel:null,cap:null,tab:'overview',info:{}};
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',1600)}
+
+// ---- hidden-char + PII highlighting (mirrors wiretap/analyze.py categories) ----
+const HIDDEN=/[\u200B-\u200F\u2060-\u2064\uFEFF\u180E\u034F\u061C\u202A-\u202E\u2066-\u2069\uFE00-\uFE0F\u00AD\u00A0\u2000-\u200A\u202F\u205F\u3000\u2028\u2029\uE000-\uF8FF\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]|\uDB40[\uDC00-\uDC7F\uDD00-\uDDEF]/;
+function hiRegex(pii){
+  const vals=(pii&&pii.items||[]).filter(i=>i.type!=='secret'&&i.type!=='ip_address'&&i.value&&i.value.length>=3).map(i=>i.value).sort((a,b)=>b.length-a.length).slice(0,60);
+  const parts=[HIDDEN.source];
+  if(vals.length) parts.push(vals.map(v=>v.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'));
+  return new RegExp(parts.map(p=>'('+p+')').join('|'),'g');
+}
+function highlight(text,re){
+  text=String(text??'');let out='',last=0,m;re.lastIndex=0;
+  if(text.length>400000) text=text.slice(0,400000)+'\n… [truncated in view; full text in Raw/JSON export]';
+  while((m=re.exec(text))){
+    if(m[0]===''){re.lastIndex++;continue}
+    out+=esc(text.slice(last,m.index));
+    if(m[1]!==undefined){const cp=m[0].codePointAt(0);const h='U+'+cp.toString(16).toUpperCase().padStart(4,'0');
+      const info=(cp===0xA0||cp===0x202F)?' info':'';out+=`<span class="hc${info}" title="hidden/unusual character ${h}">${h}</span>`}
+    else out+=`<mark title="personal data">${esc(m[0])}</mark>`;
+    last=m.index+m[0].length;
+  }
+  return out+esc(text.slice(last));
+}
+
+// ---- list ----
+async function poll(){
+  try{
+    const r=await api('/api/captures?rev='+state.rev);
+    if(!r.unchanged){state.rev=r.rev;state.items=r.items;renderList(r.endpoints||[]);
+      if($('#follow').checked&&state.items.length&&state.items[0].id!==state.sel) select(state.items[0].id);
+      else if(state.sel&&(!state.cap||state.cap.state!=='done')) loadSel();
+      if(!state.items.length&&state.sel){state.sel=null;state.cap=null;renderDetail()}
+    }
+  }catch(e){}
+  setTimeout(poll,1000);
+}
+function renderList(endpoints){
+  $('#count').textContent=state.items.length;
+  $('#list').innerHTML=state.items.map(it=>{
+    const st=it.state!=='done'&&!it.status?'<span class="st run">…</span>':`<span class="st ${it.status<400?'ok':'bad'}">${it.status??'ERR'}</span>`;
+    const t=new Date(it.ts*1000).toLocaleTimeString();
+    return `<div class="item ${it.id===state.sel?'sel':''}" data-id="${it.id}"><div class="l1">${st}<span class="path">${esc(it.method)} ${esc(it.path)}</span><span class="tag">#${it.id}</span></div>
+    <div class="l2"><span>${t}</span><span>↑ ${kb(it.req_bytes)}</span><span>↓ ${kb(it.resp_bytes)}</span>${it.model?`<span>${esc(it.model)}</span>`:''}${it.tool_count?`<span>${it.tool_count} tools</span>`:''}
+    ${it.hidden_warn?`<span class="flag w">${it.hidden_warn} hidden</span>`:''}${it.pii_total?`<span class="flag p">${it.pii_total} PII</span>`:''}</div></div>`}).join('')||'<div class="endpoints">No requests yet.</div>';
+  document.querySelectorAll('.item').forEach(e=>e.onclick=()=>{$('#follow').checked=false;select(+e.dataset.id)});
+  $('#endpoints').innerHTML=endpoints.length?'<h4>Endpoints contacted (via this proxy)</h4>'+endpoints.map(e=>`<div class="mono">${esc(e.endpoint)} <span style="color:var(--fg)">×${e.count}</span> ↑${kb(e.bytes_out)} ↓${kb(e.bytes_in)}</div>`).join(''):'';
+}
+async function select(id){state.sel=id;document.querySelectorAll('.item').forEach(e=>e.classList.toggle('sel',+e.dataset.id===id));await loadSel()}
+async function loadSel(){if(!state.sel)return;const c=await api('/api/captures/'+state.sel);if(c.error)return;state.cap=c;renderDetail()}
+
+// ---- detail ----
+const TABS=[['overview','Overview'],['system','System prompt'],['tools','Tools'],['messages','Messages'],['hidden','Hidden chars'],['pii','Personal data'],['diff','Diff vs previous'],['headers','Headers'],['response','Response'],['raw','Raw JSON']];
+function renderDetail(){
+  const c=state.cap,d=$('#detail');
+  if(!c){d.innerHTML=emptyHTML();return}
+  const h=c.hidden||{},p=c.pii||{},dec=c.decoded||{system:[],tools:[],messages:[]};
+  const cnt={system:(dec.system||[]).length,tools:(dec.tools||[]).length,messages:(dec.messages||[]).length,hidden:h.warn,pii:p.total};
+  d.innerHTML=`<div class="dhead"><h2>#${c.id} ${esc(c.method)} ${esc(c.path)}</h2>
+   <span class="pill">${esc(c.api||'…')}</span>${c.model?`<span class="pill">${esc(c.model)}</span>`:''}<span class="pill">${c.status??(c.state||'')}</span>
+   <div class="grow"></div><a href="${BASE}/api/captures/${c.id}.json" download><button>Export JSON</button></a>
+   <a href="${BASE}/api/captures/${c.id}.md" download><button>Shareable report (.md)</button></a></div>
+   ${c.error?`<div class="bad">${esc(c.error)}</div>`:''}${c.analysis_note?`<div class="note">${esc(c.analysis_note)}</div>`:''}
+   <div class="tabs">${TABS.map(([k,l])=>`<button class="tab ${state.tab===k?'on':''}" data-t="${k}">${l}${cnt[k]?`<span class="n ${k==='hidden'?'w':k==='pii'?'p':''}">${cnt[k]}</span>`:''}</button>`).join('')}</div>
+   <div id="pane"></div>`;
+  d.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{state.tab=b.dataset.t;renderDetail()});
+  const re=hiRegex(p);
+  $('#pane').innerHTML=(VIEWS[state.tab]||VIEWS.overview)(c,dec,re);
+  $('#pane').querySelectorAll('details[data-lazy]').forEach(el=>{const fill=()=>{const pre=el.querySelector('pre');if(el.open&&!pre.dataset.done){pre.innerHTML=highlight(LAZY[pre.dataset.src],re);pre.dataset.done=1}};el.addEventListener('toggle',fill);fill()});
+}
+let LAZY=[];
+function lazy(text){LAZY.push(text);return LAZY.length-1}
+function bars(rows,color){const max=Math.max(1,...rows.map(r=>r.bytes));return `<div class="bars">${rows.map(r=>`<div class="row"><div class="lab" title="${esc(r.label)}">${esc(r.label)}</div><div class="bar"><div style="width:${(100*r.bytes/max).toFixed(1)}%;background:${r.color||color}"></div></div><div class="num">${kb(r.bytes)} · ~${fmt(Math.ceil(r.bytes/4))}t</div></div>`).join('')}</div>`}
+const KC={system:'var(--sys)',tool:'var(--tools)',message:'var(--msgs)'};
+const VIEWS={
+ overview(c,dec){
+  const s=c.summary||{};const u=(c.response||{}).usage||{};
+  if(!c.summary) return `<div class="note">${c.is_json===false?'Body is not JSON; see Raw.':'Analyzing…'}</div>`;
+  const tot=Math.max(1,s.system_bytes+s.tools_bytes+s.messages_bytes+s.other_bytes);
+  const seg=(b,col)=>`<div style="width:${(100*b/tot).toFixed(2)}%;background:${col}"></div>`;
+  const reported=['input_tokens','cache_creation_input_tokens','cache_read_input_tokens','output_tokens','prompt_tokens','completion_tokens','promptTokenCount','candidatesTokenCount'].filter(k=>u[k]!=null);
+  const hero=s.last_user_bytes?`<div class="hero"><div class="sub">“Reply OK” view: your last message vs. the whole request</div>
+   <div class="big">Your message: <em>${fmt(s.last_user_bytes)} B</em>. <em>${fmt(s.total_bytes)} B</em> left your laptop.</div>
+   <div class="sub">The request was <b style="color:var(--fg)">${s.amplification}×</b> the size of the last user message (all its text blocks, including any the agent added)${s.last_user_text?`: <q>${esc(s.last_user_text.slice(0,140))}${s.last_user_text.length>140?'…':''}</q>`:''}</div></div>`
+   :`<div class="hero"><div class="big"><em>${fmt(s.total_bytes)} B</em> left your laptop in this request.</div></div>`;
+  const alerts=[(c.hidden||{}).warn?`<span class="chip warn">⚠ ${c.hidden.warn} hidden/unusual characters</span>`:'<span class="chip ok">✓ no hidden characters flagged</span>',
+    (c.pii||{}).total?`<span class="chip bad">${c.pii.total} personal-data matches (${Object.entries(c.pii.counts).map(([k,v])=>k+': '+v).join(', ')})</span>`:'<span class="chip ok">✓ no personal data matched</span>'];
+  return hero+`<div class="chips">${alerts.join('')}</div><div class="grid">
+   <div class="card"><div class="k">Request body</div><div class="v">${kb(s.total_bytes)}</div><div class="s">~${fmt(s.total_tokens_est)} tokens (est.)</div></div>
+   <div class="card"><div class="k">System prompt</div><div class="v">~${fmt(s.system_tokens)}t</div><div class="s">${kb(s.system_bytes)} in ${s.system_blocks} block(s)</div></div>
+   <div class="card"><div class="k">Tool schemas</div><div class="v">~${fmt(s.tools_tokens)}t</div><div class="s">${s.tool_count} tools · ${kb(s.tools_bytes)}</div></div>
+   <div class="card"><div class="k">Messages</div><div class="v">~${fmt(s.messages_tokens)}t</div><div class="s">${s.message_count} messages · ${kb(s.messages_bytes)}</div></div>
+   ${reported.length?`<div class="card"><div class="k">Reported by the API</div>${reported.map(k=>`<div class="s"><span class="mono">${k}</span>: <b style="color:var(--fg)">${fmt(u[k])}</b></div>`).join('')}</div>`:''}
+   <div class="card"><div class="k">Timing</div><div class="v">${c.duration_ms!=null?fmt(c.duration_ms)+' ms':'…'}</div><div class="s">first byte ${c.ttfb_ms!=null?fmt(c.ttfb_ms)+' ms':'–'} · ↓ ${kb(c.resp_bytes)}</div></div></div>
+   <h3>Where the bytes go</h3><div class="stack">${seg(s.system_bytes,'var(--sys)')}${seg(s.tools_bytes,'var(--tools)')}${seg(s.messages_bytes,'var(--msgs)')}${seg(s.other_bytes,'var(--other)')}</div>
+   <div class="legend"><span><i style="background:var(--sys)"></i>system ${kb(s.system_bytes)}</span><span><i style="background:var(--tools)"></i>tools ${kb(s.tools_bytes)}</span><span><i style="background:var(--msgs)"></i>messages ${kb(s.messages_bytes)}</span><span><i style="background:var(--other)"></i>other params ${kb(s.other_bytes)}</span></div>
+   <h3>Biggest items</h3>${bars((s.biggest||[]).map(b=>({label:b.kind+': '+b.label,bytes:b.bytes,color:KC[b.kind]})))}
+   <div class="note">Token counts marked ~ / “t” are estimates (bytes ÷ 4). Numbers under “Reported by the API” come from the response’s own usage field.</div>`;
+ },
+ system(c,dec){LAZY=[];if(!dec.system.length)return '<div class="note">No system prompt field in this request.</div>';
+  return dec.system.map((x,i)=>`<details data-lazy ${i===0?'open':''}><summary><b>${esc(x.label)}</b><span class="meta">${kb(x.bytes)} · ~${fmt(x.tokens)}t</span></summary><pre data-src="${lazy(x.text)}"></pre></details>`).join('')},
+ tools(c,dec){LAZY=[];if(!dec.tools.length)return '<div class="note">No tools in this request.</div>';
+  const t=[...dec.tools].sort((a,b)=>b.bytes-a.bytes);
+  return `<h3>${t.length} tool schemas · ${kb(t.reduce((a,b)=>a+b.bytes,0))}</h3>`+bars(t.map(x=>({label:x.name,bytes:x.bytes})),'var(--tools)')+'<h3>Schemas</h3>'+
+   t.map(x=>`<details data-lazy><summary><b class="mono">${esc(x.name)}</b><span class="tag">${esc((x.description||'').slice(0,90))}</span><span class="meta">${kb(x.bytes)} · ~${fmt(x.tokens)}t</span></summary><pre data-src="${lazy(JSON.stringify(x.json,null,2))}"></pre></details>`).join('')},
+ messages(c,dec){LAZY=[];if(!dec.messages.length)return '<div class="note">No messages.</div>';
+  return dec.messages.map((m,i)=>`<details data-lazy><summary><span class="role ${esc(m.role)}">${esc(m.role)}</span><span class="tag">#${i} ${esc((m.kinds||[]).join(', '))}</span><span class="tag" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:50vw">${esc(m.text.slice(0,120))}</span><span class="meta">${kb(m.bytes)} · ~${fmt(m.tokens)}t</span></summary><pre data-src="${lazy(m.text)}"></pre></details>`).join('')},
+ hidden(c){const h=c.hidden||{};if(!h.total)return '<div class="note ok">✓ No zero-width, bidi, tag, variation-selector, control, private-use, format, unusual-space or mixed-script characters found.</div>';
+  return `<div class="chips">${Object.entries(h.counts).map(([k,v])=>`<span class="chip">${esc(k)}: <b>${v}</b></span>`).join('')}</div>
+   <div class="note">“info” = likely benign (e.g. part of an emoji sequence or a no-break space). Context shows each flagged character as a red U+XXXX badge.</div>
+   ${(h.tag_runs||[]).length?`<h3>Decoded Unicode tag-character text</h3><table><tr><th>Where</th><th>Decoded</th></tr>${h.tag_runs.map(r=>`<tr><td class="mono">${esc(r.path)}</td><td class="mono">${esc(r.decoded)}</td></tr>`).join('')}</table>`:''}
+   <h3>Findings${h.findings.length<h.total?` (first ${h.findings.length} of ${h.total})`:''}</h3>
+   <table><tr><th>Category</th><th>Char</th><th>Where</th><th>Context</th></tr>${h.findings.map(f=>`<tr><td><span class="${f.severity==='warn'?'warn':'tag'}">${esc(f.category)}</span></td><td class="mono">${esc(f.codepoint)}<br><span class="tag">${esc(f.name)}</span></td><td class="mono">${esc(f.path)}</td><td class="mono">${esc(f.context).replace(/⟦(U\+[0-9A-F]+)⟧/g,'<span class="hc">$1</span>')}</td></tr>`).join('')}</table>`},
+ pii(c){const p=c.pii||{};if(!p.total)return '<div class="note ok">✓ No emails, home-directory paths, local username/hostname, git identity, git remotes, IPs or key-like secrets matched.</div>';
+  return `<div class="note">Matched locally against patterns and this machine’s own username, hostname, home dir and git identity. Values are shown only here, on your machine; the shareable report omits them. Secrets are always redacted.</div>
+   <table><tr><th>Type</th><th>Value</th><th>Count</th><th>Where (first 5)</th></tr>${p.items.map(i=>`<tr><td>${esc(i.type)}</td><td class="mono"><mark>${esc(i.value)}</mark></td><td>${i.count}</td><td class="mono">${i.paths.map(esc).join('<br>')}</td></tr>`).join('')}</table>`},
+ diff(c){const d=c.diff;if(!d)return '<div class="note">No earlier request to the same endpoint to compare with.</div>';
+  const sg=n=>(n>0?'+':'')+fmt(n);
+  return `<div class="grid"><div class="card"><div class="k">vs request</div><div class="v">#${d.previous_id}</div></div>
+   <div class="card"><div class="k">Size change</div><div class="v">${sg(d.bytes_delta)} B</div></div>
+   <div class="card"><div class="k">System prompt</div><div class="v ${d.system_changed?'warn':'ok'}">${d.system_changed?'changed':'same'}</div><div class="s">${sg(d.system_bytes_delta)} B</div></div>
+   <div class="card"><div class="k">Tools</div><div class="v">${sg(d.tools_bytes_delta)} B</div><div class="s">+${d.tools_added.length} / −${d.tools_removed.length} / ~${d.tools_changed.length}</div></div>
+   <div class="card"><div class="k">Messages</div><div class="v">${d.messages_prev} → ${d.messages_cur}</div><div class="s">${d.history_rewritten?'<span class="warn">earlier history differs</span>':'history kept as prefix'}</div></div></div>
+   ${d.tools_added.length?`<h3>Tools added</h3><div class="mono">${d.tools_added.map(esc).join(', ')}</div>`:''}
+   ${d.tools_removed.length?`<h3>Tools removed</h3><div class="mono">${d.tools_removed.map(esc).join(', ')}</div>`:''}
+   ${d.tools_changed.length?`<h3>Tools changed</h3><div class="mono">${d.tools_changed.map(t=>esc(t.name)+' ('+sg(t.delta)+' B)').join(', ')}</div>`:''}
+   ${d.other_changed.length?`<h3>Other params changed</h3><div class="mono">${d.other_changed.map(esc).join(', ')}</div>`:''}
+   <h3>New / changed messages (from #${d.messages_common_prefix})</h3>${d.new_messages.map(m=>`<details><summary><span class="role ${esc(m.role)}">${esc(m.role)}</span><span class="tag">#${m.index}</span><span class="tag">${esc(m.preview.slice(0,120))}</span><span class="meta">${kb(m.bytes)}</span></summary><pre>${esc(m.preview)}</pre></details>`).join('')||'<div class="note">none</div>'}
+   ${d.system_changed?`<h3>System prompt diff</h3><pre class="dl">${d.system_diff.map(l=>`<span class="${l.startsWith('@@')?'h':l.startsWith('+')?'a':l.startsWith('-')?'d':''}">${esc(l)}</span>`).join('\n')}</pre>`:''}`},
+ headers(c){const t=(h)=>`<table><tr><th>Name</th><th>Value</th></tr>${(h||[]).map(([k,v])=>`<tr><td class="mono">${esc(k)}</td><td class="mono">${esc(v)}</td></tr>`).join('')}</table>`;
+  return `<div class="note">Credentials are redacted here and everywhere else in ${esc(state.info.name||'wiretap')}; they are forwarded to the upstream untouched.</div><h3>Request → ${esc(c.upstream)}</h3>${t(c.req_headers)}<h3>Response</h3>${t(c.resp_headers)}`},
+ response(c){const r=c.response;if(!r)return '<div class="note">Waiting for the response…</div>';
+  return `<div class="grid"><div class="card"><div class="k">Kind</div><div class="v">${esc(r.kind)}</div><div class="s">${r.events?r.events+' SSE events':''}</div></div>
+   <div class="card"><div class="k">Stop reason</div><div class="v">${esc(r.stop_reason||'–')}</div></div>
+   <div class="card"><div class="k">Tool calls</div><div class="v">${(r.tool_calls||[]).length}</div><div class="s mono">${esc((r.tool_calls||[]).join(', '))}</div></div>
+   <div class="card"><div class="k">Thinking</div><div class="v">${fmt(r.thinking_chars||0)}</div><div class="s">chars streamed</div></div></div>
+   ${r.note?`<div class="note">${esc(r.note)}</div>`:''}
+   ${Object.keys(r.usage||{}).length?`<h3>Usage (reported by the API)</h3><pre class="mono">${esc(JSON.stringify(r.usage,null,2))}</pre>`:''}
+   ${Object.keys(r.event_types||{}).length?`<h3>Event types</h3><div class="chips">${Object.entries(r.event_types).map(([k,v])=>`<span class="chip mono">${esc(k)} ×${v}</span>`).join('')}</div>`:''}
+   <h3>Assembled text</h3><details open><summary>text</summary><pre>${esc(r.text||'')}</pre></details>
+   <details><summary>Raw response (first 20 KB, secrets redacted)</summary><pre>${esc(r.raw_preview||'')}</pre></details>`},
+ raw(c){return `<div class="note">Request body as captured, with key-like secrets redacted.</div><pre style="white-space:pre-wrap;word-break:break-word">${esc(typeof c.body==='string'?c.body:JSON.stringify(c.body,null,2))}</pre>`},
+};
+function envLine(){const i=state.info;return (i.upstream||'').includes('openai')?`OPENAI_BASE_URL=${i.proxy}/v1 codex`:(i.upstream||'').includes('googleapis')?`# point your Gemini client at ${i.proxy}`:`ANTHROPIC_BASE_URL=${i.proxy} claude`}
+function emptyHTML(){return `<div class="empty"><h1>Waiting for your agent…</h1><p>Start your coding agent through the proxy, in another terminal:</p><pre>${esc(envLine())}</pre>
+ <p>Then send it anything, even <b>“Reply OK”</b>, and watch exactly what leaves your laptop.</p><p class="tag">Captures stay in this process’s memory${state.info.save?' and '+esc(state.info.save):''}. Nothing is sent anywhere except ${esc(state.info.upstream||'the upstream')}.</p></div>`}
+$('#copyenv').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText($('#envline').textContent).then(()=>toast('copied'))};
+$('#clear').onclick=async()=>{await fetch(BASE+'/api/clear',{method:'POST'});state.sel=null;state.cap=null;renderDetail()};
+(function(){const h=new URLSearchParams(location.hash.slice(1));if(h.get('tab'))state.tab=h.get('tab');if(h.get('id')){$('#follow').checked=false;state.sel=+h.get('id');loadSel()}})();
+api('/api/info').then(i=>{state.info=i;$('#envline').textContent=envLine();$('#upstream').textContent='→ '+i.upstream;document.title=i.name;$('#tagline').textContent=i.tagline;
+ if(i.name!=='wiretap')$('#logo').textContent=i.name;renderDetail();poll()});
+</script>
+</body>
+</html>
