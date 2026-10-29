@@ -11,9 +11,12 @@ kill -0 $PID 2>/dev/null || { echo "demo failed to start (ports 8787/8788 busy?)
 sleep 1
 shot(){ "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,900 \
   --virtual-time-budget=4000 --screenshot="docs/$1" "http://127.0.0.1:8788/#$2" 2>/dev/null; echo "wrote docs/$1"; }
-shot screenshot-overview.png "id=3&tab=overview"
-shot screenshot-tools.png "id=3&tab=tools"
-shot screenshot-diff.png "id=2&tab=diff"
-shot screenshot-pii.png "id=3&tab=pii"
-shot screenshot-system.png "id=3&tab=system"
-shot screenshot-hidden.png "id=3&tab=hidden"
+shot screenshot-overview.png "id=3&tab=overview&theme=light"
+shot screenshot-tools.png "id=3&tab=tools&theme=light"
+shot screenshot-diff.png "id=2&tab=diff&theme=light"
+shot screenshot-pii.png "id=3&tab=pii&theme=light"
+shot screenshot-system.png "id=3&tab=system&theme=light"
+shot screenshot-hidden.png "id=3&tab=hidden&theme=light"
+shot screenshot-overview-dark.png "id=3&tab=overview&theme=dark"
+shot screenshot-hidden-dark.png "id=3&tab=hidden&theme=dark"
+shot screenshot-pii-dark.png "id=3&tab=pii&theme=dark"

@@ -287,6 +287,8 @@ def char_category(cp: int) -> Optional[str]:
         return "tag"
     if 0xFE00 <= cp <= 0xFE0F or 0xE0100 <= cp <= 0xE01EF:
         return "variation_selector"
+    if cp in APOSTROPHE_LOOKALIKES:
+        return "apostrophe_lookalike"
     ch = chr(cp)
     cat = unicodedata.category(ch)
     if cat == "Cc" and ch not in "\t\n\r":
@@ -318,6 +320,78 @@ def _is_emoji_neighbour(s: str, i: int) -> bool:
     return False
 
 
+# Apostrophe/quote lookalikes that are letters (Lm), so they hide inside words.
+# U+02BC / U+02B9 are the ones Claude Code 2.1.91-2.1.196 swapped into "Today's"
+# in its system prompt when ANTHROPIC_BASE_URL was custom. The normal curly
+# apostrophe U+2019 is deliberately NOT here.
+APOSTROPHE_LOOKALIKES = {0x02B9, 0x02BB, 0x02BC, 0x02BD, 0x02C8, 0x055A, 0xA78C, 0xFF07}
+
+# Scripts that legitimately use ZWJ / ZWNJ inside words (Indic, Arabic, Persian, Sinhala...).
+def _joiner_script(ch: str) -> bool:
+    cp = ord(ch)
+    return (0x0600 <= cp <= 0x06FF or 0x0750 <= cp <= 0x077F or 0x0900 <= cp <= 0x0DFF
+            or 0xA8E0 <= cp <= 0xA8FF or 0x1CD0 <= cp <= 0x1CFF or 0xFB50 <= cp <= 0xFEFC)
+
+
+def _is_vs(cp: int) -> bool:
+    return 0xFE00 <= cp <= 0xFE0F or 0xE0100 <= cp <= 0xE01EF
+
+
+def _benign_joiner(s: str, i: int) -> bool:
+    """ZWJ/ZWNJ that is part of an emoji sequence or of Indic/Arabic shaping."""
+    cp = ord(s[i])
+    if cp == 0x200D and _is_emoji_neighbour(s, i):
+        return True
+    if cp == 0x200D and i > 0 and ord(s[i - 1]) == 0xFE0F and i + 1 < len(s) and unicodedata.category(s[i + 1]) in ("So", "Sk"):
+        return True
+    if cp in (0x200C, 0x200D):
+        prev = s[i - 1] if i > 0 else ""
+        nxt = s[i + 1] if i + 1 < len(s) else ""
+        if (prev and _joiner_script(prev)) or (nxt and _joiner_script(nxt)):
+            return True
+    return False
+
+
+def _benign_vs(s: str, i: int) -> bool:
+    """A single variation selector on a plausible base (emoji, keycap digit,
+    CJK ideograph, math symbol). Runs of selectors are never benign: that is how
+    bytes get smuggled inside an emoji."""
+    cp = ord(s[i])
+    if (i > 0 and _is_vs(ord(s[i - 1]))) or (i + 1 < len(s) and _is_vs(ord(s[i + 1]))):
+        return False
+    if i == 0:
+        return False
+    base = s[i - 1]
+    bcat = unicodedata.category(base)
+    if cp in (0xFE0E, 0xFE0F):
+        if bcat in ("So", "Sk", "Sm") or base in "0123456789#*":
+            return True
+    if 0xFE00 <= cp <= 0xFE0D and bcat in ("Sm", "So", "Lo"):
+        return True
+    if 0xE0100 <= cp <= 0xE01EF and (0x3400 <= ord(base) <= 0x9FFF or 0x20000 <= ord(base) <= 0x3FFFF):
+        return True
+    return False
+
+
+def _flag_tag_spans(s: str) -> set:
+    """Indexes of tag characters that form a valid emoji flag sequence
+    (U+1F3F4 + lowercase tag letters/digits + U+E007F), e.g. the Scotland flag."""
+    ok = set()
+    i = s.find("\U0001F3F4")
+    while i != -1:
+        j = i + 1
+        while j < len(s) and (0xE0030 <= ord(s[j]) <= 0xE0039 or 0xE0061 <= ord(s[j]) <= 0xE007A):
+            j += 1
+        if j < len(s) and ord(s[j]) == 0xE007F and 2 <= j - i - 1 <= 6:
+            ok.update(range(i + 1, j + 1))
+        i = s.find("\U0001F3F4", i + 1)
+    return ok
+
+
+def _vs_byte(cp: int) -> int:
+    return cp - 0xFE00 if cp <= 0xFE0F else cp - 0xE0100 + 16
+
+
 def _walk_strings(obj: Any, path: str = "$"):
     if isinstance(obj, str):
         yield path, obj
@@ -343,6 +417,21 @@ def _context(s: str, i: int, width: int = 24) -> str:
     return "".join(out).replace("\n", "\u21b5")
 
 
+def _flush_vs(vs_run: List[int], path: str, tag_runs: List[Dict[str, str]]):
+    """Runs of 2+ variation selectors can encode bytes (one selector = one byte);
+    show what they decode to, if it is readable UTF-8."""
+    if len(vs_run) < 2:
+        return
+    try:
+        text = bytes(vs_run).decode("utf-8")
+    except UnicodeDecodeError:
+        text = None
+    if text and all(c.isprintable() or c in "\n\t" for c in text):
+        tag_runs.append({"path": path, "kind": "variation_selectors", "decoded": text})
+    else:
+        tag_runs.append({"path": path, "kind": "variation_selectors", "decoded": "(%d selectors, not readable text)" % len(vs_run)})
+
+
 def scan_hidden(obj: Any, limit: int = 500) -> Dict[str, Any]:
     """Find zero-width, bidi, tag, variation-selector, control, private-use,
     format and unusual-space characters plus mixed-script (homoglyph-ish)
@@ -362,27 +451,46 @@ def scan_hidden(obj: Any, limit: int = 500) -> Dict[str, Any]:
         if s.isascii():
             continue
         run = []
+        vs_run = []
+        flags = _flag_tag_spans(s) if "\U0001F3F4" in s else set()
         for i, ch in enumerate(s):
             cp = ord(ch)
             cat = char_category(cp)
+            if cat == "tag" and i in flags:
+                add(cat, path, s, i, "info")
+                continue
             if cat == "tag":
                 run.append(chr(cp - 0xE0000) if 0x20 <= cp - 0xE0000 < 0x7F else "")
             elif run:
-                tag_runs.append({"path": path, "decoded": "".join(run)})
+                tag_runs.append({"path": path, "kind": "tag", "decoded": "".join(run)})
                 run = []
+            if cat == "variation_selector":
+                vs_run.append(_vs_byte(cp))
+            elif vs_run:
+                _flush_vs(vs_run, path, tag_runs)
+                vs_run = []
             if cat:
-                sev = "info" if cat in ("zero_width", "variation_selector") and _is_emoji_neighbour(s, i) else "warn"
-                if cat == "unusual_space" and cp in (0xA0, 0x202F):
+                sev = "warn"
+                if cat == "zero_width" and _benign_joiner(s, i):
                     sev = "info"
+                elif cat == "variation_selector" and _benign_vs(s, i):
+                    sev = "info"
+                elif cat == "unusual_space" and cp in (0xA0, 0x202F):
+                    sev = "info"
+                elif cat == "apostrophe_lookalike":
+                    near_latin = any(0 <= j < len(s) and LATIN.match(s[j]) for j in (i - 1, i + 1))
+                    sev = "warn" if near_latin else "info"
                 add(cat, path, s, i, sev)
         if run:
-            tag_runs.append({"path": path, "decoded": "".join(run)})
+            tag_runs.append({"path": path, "kind": "tag", "decoded": "".join(run)})
+        if vs_run:
+            _flush_vs(vs_run, path, tag_runs)
         for m in WORD.finditer(s):
             w = m.group(0)
             if LATIN.search(w):
                 for k, ch in enumerate(w):
                     cp = ord(ch)
-                    if 0x0370 <= cp <= 0x03FF or 0x0400 <= cp <= 0x04FF or 0xFF21 <= cp <= 0xFF5A:
+                    if 0x0370 <= cp <= 0x03FF or 0x0400 <= cp <= 0x052F or 0xFF21 <= cp <= 0xFF5A:
                         add("homoglyph", path, s, m.start() + k)
     total = sum(counts.values())
     warn = sum(1 for f in findings if f["severity"] == "warn")

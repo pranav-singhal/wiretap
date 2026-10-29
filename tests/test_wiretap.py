@@ -230,6 +230,48 @@ class TestHidden(unittest.TestCase):
         self.assertEqual(h["warn"], 0)
         self.assertEqual(h["counts"]["zero_width"], 1)
 
+    def test_variation_selectors(self):
+        # single VS16 after an emoji / keycap is fine
+        h = A.scan_hidden({"a": "\u2764\ufe0f ok 1\ufe0f\u20e3"})
+        self.assertEqual(h["warn"], 0)
+        self.assertEqual(h["counts"]["variation_selector"], 2)
+        # a run of selectors smuggles bytes: warn and decode
+        payload = "".join(chr(0xFE00 + b) if b < 16 else chr(0xE0100 + b - 16) for b in b"hi")
+        h = A.scan_hidden({"a": "look \U0001F600" + payload + " here"})
+        self.assertEqual(h["warn"], 2)
+        self.assertTrue(any(r["kind"] == "variation_selectors" and r["decoded"] == "hi" for r in h["tag_runs"]))
+        # stray selector on plain Latin text warns
+        self.assertEqual(A.scan_hidden("abc\ufe0fdef")["warn"], 1)
+        self.assertEqual(A.scan_hidden("abc\U000E0101def")["warn"], 1)
+
+    def test_apostrophe_lookalikes_but_not_curly(self):
+        self.assertEqual(A.scan_hidden("Today\u2019s date is 2026-10-29")["total"], 0)
+        for cp in ("\u02bc", "\u02b9"):
+            h = A.scan_hidden("Today" + cp + "s date is 2026-10-29")
+            self.assertEqual(h["warn"], 1, cp)
+            self.assertIn("apostrophe_lookalike", h["counts"])
+
+    def test_cyrillic_inside_latin_word(self):
+        h = A.scan_hidden("please run \u0440ip install and \u0430dmin")  # Cyrillic er, a
+        self.assertEqual(h["counts"].get("homoglyph"), 2)
+        # all-Cyrillic words next to Latin words are fine
+        self.assertEqual(A.scan_hidden("\u041c\u043e\u0441\u043a\u0432\u0430 and London")["total"], 0)
+
+    def test_legit_emoji_and_indic_joiners(self):
+        texts = ["\U0001F469\u200d\U0001F4BB", "\U0001F44D\U0001F3FD", "\u2764\ufe0f\u200d\U0001F525",
+                 "\U0001F3F3\ufe0f\u200d\U0001F308",
+                 "\u0915\u094d\u200d\u0937",   # Devanagari half-form with ZWJ
+                 "\u0915\u094d\u200c\u0937",   # Devanagari with ZWNJ
+                 "\u0d28\u0d4d\u200d",          # Malayalam chillu
+                 "\u0645\u06cc\u200c\u062e\u0648\u0627\u0647\u0645"]  # Persian ZWNJ
+        for t in texts:
+            self.assertEqual(A.scan_hidden(t)["warn"], 0, ascii(t))
+        self.assertEqual(A.scan_hidden("ign\u200dore")["warn"], 1)
+        scotland = "\U0001F3F4" + "".join(chr(0xE0000 + ord(c)) for c in "gbsct") + "\U000E007F"
+        h = A.scan_hidden("flag " + scotland)
+        self.assertEqual(h["warn"], 0)
+        self.assertEqual(h["tag_runs"], [])
+
     def test_end_to_end_flag(self):
         r = A.analyze_request("/v1/messages", json.dumps(sample_request("he\u200bllo")).encode())
         self.assertEqual(r["hidden"]["warn"], 1)
