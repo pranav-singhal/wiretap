@@ -15,13 +15,10 @@ the system prompt, every tool schema, the whole re-sent history, hidden Unicode,
 
 **[Quick start](#quick-start) · [What you'll see](#what-youll-see) · [Privacy](#privacy-first) · [Agents](#supported-agents) · [FAQ](#faq) · [Contributing](#contributing)**
 
-<!-- HERO: swap for docs/hero.gif recorded from a real session (see docs/launch-plan.md, pre-launch checklist) -->
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-overview-dark.png">
-  <img src="docs/screenshot-overview.png" alt="wiretap: 'Your message: 8 B. 11,155 B left your laptop.' with the request split into system prompt, tools and messages (synthetic demo data)" width="900">
-</picture>
+<!-- HERO: regenerate with scripts/record_gif.sh (synthetic demo data only) -->
+<img src="docs/demo.gif" alt="wiretap demo: 'Reply OK' turns into an 11 KB request; tool schemas ranked by size; a hidden tag-character instruction decoded; personal data highlighted; dark mode (synthetic demo data)" width="900">
 
-<sub>You type <code>Reply OK</code>. This is what actually leaves your laptop. (Screenshot from the built-in synthetic demo, not real traffic.)</sub>
+<sub>You type <code>Reply OK</code>. This is what actually leaves your laptop. (Recorded from the built-in synthetic demo, not real traffic. [MP4](docs/demo.mp4))</sub>
 
 </div>
 
@@ -66,6 +63,11 @@ Type `Reply OK`, then look at <http://127.0.0.1:8788>. Python 3.9+, standard lib
 <td><img src="docs/screenshot-tools.png" alt="tool schemas ranked by size (synthetic)"></td>
 <td><img src="docs/screenshot-diff.png" alt="diff between two turns (synthetic)"></td>
 </tr></table>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-overview-dark.png">
+  <img src="docs/screenshot-overview.png" alt="wiretap overview: 'Your message: 8 B. 11,155 B left your laptop.' (synthetic demo data)" width="900">
+</picture>
 
 Beige by default, dark mode one click away (it follows your system setting until you pick).
 

@@ -10,8 +10,8 @@ Researched 29 Oct 2026. Counts and rules were read on that day and change often:
 
 - [ ] Push the repo, then **pin it** on your profile.
 - [ ] Add a description (the tagline) and these topics: `claude-code codex ai-agents llm proxy debugging observability prompt-injection security mcp developer-tools`.
-- [ ] **Record the hero GIF from a real session** on your Mac: `wiretap --open`, a fresh `claude` through it, type `Reply OK`, show the overview, then the Tools and Hidden chars tabs. 10–15 s, 1200 px wide (`ffmpeg -i in.mov -vf "fps=12,scale=1200:-1" docs/hero.gif`).
-  - **Before recording, open the Personal data tab and check what's on screen.** Your real session contains your email, username, home path and memory file contents. Record in a throwaway directory, use a throwaway user or a demo `~/.claude` setup, or crop. Then replace the `<picture>` hero in the README with the GIF.
+- [x] **Hero GIF recorded from synthetic demo data**: `docs/demo.gif` (+ `docs/demo.mp4` for X), regenerate with `scripts/record_gif.sh`. It is already the README hero.
+  - Optional: a real-session clip later. **Before recording, open the Personal data tab and check what's on screen**; a real session contains your email, username, home path and memory file contents. Use a throwaway directory or demo `~/.claude` setup, or crop.
 - [ ] Fill numbers only from real measurements. For the X post you need from one fresh `Reply OK` run: request size, system prompt size, number of tools, tools size, Claude Code version (`claude --version`). Write them down with the date.
 - [ ] Run the hidden-character demo for real: put a file with a tag-character line in a scratch repo, ask Claude Code to read it, screenshot the Hidden chars tab. (`scripts/demo.py` shows how the synthetic one is built.) Only claim what you saw.
 - [ ] Test Codex CLI in API-key mode if you can; otherwise the agents table already says "untested".
