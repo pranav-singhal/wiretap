@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Record docs/demo.gif + docs/demo.mp4 from the wiretap UI using SYNTHETIC demo traffic only.
+# Record docs/demo-synthetic.gif + docs/demo-synthetic.mp4 from the wiretap UI using SYNTHETIC demo traffic only.
 # Needs: google-chrome (or $CHROME), node >= 20, ffmpeg.   Usage: scripts/record_gif.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -13,8 +13,8 @@ FRAMES=$FRAMES FPS=$FPS node $NODE_FLAGS --no-warnings scripts/record_gif.mjs
 # GIF: one palette for the whole clip, only changed pixels re-encoded per frame
 ffmpeg -y -loglevel error -framerate "$FPS" -i "$FRAMES/f%05d.png" \
   -vf "scale=$GIF_W:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" \
-  -loop 0 docs/demo.gif
+  -loop 0 docs/demo-synthetic.gif
 # MP4: smaller and sharper, for places that accept video (X, GitHub drag-and-drop)
 ffmpeg -y -loglevel error -framerate "$FPS" -i "$FRAMES/f%05d.png" \
-  -c:v libx264 -pix_fmt yuv420p -crf 24 -preset slow -movflags +faststart docs/demo.mp4
-ls -lh docs/demo.gif docs/demo.mp4
+  -c:v libx264 -pix_fmt yuv420p -crf 24 -preset slow -movflags +faststart docs/demo-synthetic.mp4
+ls -lh docs/demo-synthetic.gif docs/demo-synthetic.mp4

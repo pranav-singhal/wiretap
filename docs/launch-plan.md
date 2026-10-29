@@ -10,7 +10,7 @@ Researched 29 Oct 2026. Counts and rules were read on that day and change often:
 
 - [ ] Push the repo, then **pin it** on your profile.
 - [ ] Add a description (the tagline) and these topics: `claude-code codex ai-agents llm proxy debugging observability prompt-injection security mcp developer-tools`.
-- [x] **Hero GIF recorded from synthetic demo data**: `docs/demo.gif` (+ `docs/demo.mp4` for X), regenerate with `scripts/record_gif.sh`. It is already the README hero.
+- [x] **Hero GIF recorded from a real Claude Code session** (personal details replaced with placeholders): `docs/demo.gif` and `docs/demo.mp4` for X. A synthetic-data version lives in `docs/demo-synthetic.*` and regenerates with `scripts/record_gif.sh`.
   - Optional: a real-session clip later. **Before recording, open the Personal data tab and check what's on screen**; a real session contains your email, username, home path and memory file contents. Use a throwaway directory or demo `~/.claude` setup, or crop.
 - [ ] Fill numbers only from real measurements. For the X post you need from one fresh `Reply OK` run: request size, system prompt size, number of tools, tools size, Claude Code version (`claude --version`). Write them down with the date.
 - [ ] Run the hidden-character demo for real: put a file with a tag-character line in a scratch repo, ask Claude Code to read it, screenshot the Hidden chars tab. (`scripts/demo.py` shows how the synthetic one is built.) Only claim what you saw.
