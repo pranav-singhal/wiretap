@@ -16,9 +16,9 @@ the system prompt, every tool schema, the whole re-sent history, hidden Unicode,
 **[Quick start](#quick-start) · [What you'll see](#what-youll-see) · [Privacy](#privacy-first) · [Agents](#supported-agents) · [FAQ](#faq) · [Contributing](#contributing)**
 
 <!-- HERO: regenerate with scripts/record_gif.sh (synthetic demo data only) -->
-<img src="docs/demo.gif" alt="wiretap demo: 'Reply OK' turns into an 11 KB request; tool schemas ranked by size; a hidden tag-character instruction decoded; personal data highlighted; dark mode (synthetic demo data)" width="900">
+<img src="docs/demo.gif" alt="wiretap capturing a real Claude Code session: a 19-byte message becomes a 105 KB request; tool schemas, system prompt, personal data highlighted; dark mode (personal details redacted)" width="900">
 
-<sub>You type <code>Reply OK</code>. This is what actually leaves your laptop. (Recorded from the built-in synthetic demo, not real traffic. [MP4](docs/demo.mp4))</sub>
+<sub>A real Claude Code 2.1.312 session: you type <code>Reply OK</code>, and this is what actually leaves your laptop. Email, username, paths and IDs were replaced with placeholders for the recording. [MP4](docs/demo.mp4) · [synthetic-data version](docs/demo-synthetic.gif)</sub>
 
 </div>
 
